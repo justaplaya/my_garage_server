@@ -1,24 +1,25 @@
-const express = require("express");
-const { graphqlHTTP } = require("express-graphql");
-const cors = require("cors");
-const schema = require("./schema");
-const { GraphQLError } = require("graphql/error");
+const express = require('express');
+const { graphqlHTTP } = require('express-graphql');
+const cors = require('cors');
+const schema = require('./schema');
+const { GraphQLError } = require('graphql/error');
 const app = express();
-const WSServer = require("express-ws")(app);
+const WSServer = require('express-ws')(app);
 const aWss = WSServer.getWss();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+app.options('*', cors());
 app.use(express.json());
 
-app.ws("/", () => {});
+app.ws('/', () => {});
 
 /** отдаёт рандомное число, помноженное на multiplier и округлённое вверх */
 const getRand = (multiplier) => Math.ceil(Math.random() * multiplier);
 const getRandId = () => Date.now() * Math.trunc(Math.random() * 10000);
 
-const periods = ["week", "month", "year"];
-const incidents = ["evacuation", "violation", "crash"];
+const periods = ['week', 'month', 'year'];
+const incidents = ['evacuation', 'violation', 'crash'];
 
 /** отдаёт объект [период]: количество инцидентов  */
 const getIncidentData = () =>
@@ -40,29 +41,29 @@ const createCarFunction = (input) => {
 };
 const mock = [
   {
-    brand: "subaru",
-    model: "Impreza 2003",
+    brand: 'subaru',
+    model: 'Impreza 2003',
     year: 2005,
     maxSpeed: 329,
     timeUpTo100: 2.3,
   },
   {
-    brand: "chery",
+    brand: 'chery',
     model: null,
     year: null,
     maxSpeed: null,
     timeUpTo100: null,
   },
   {
-    brand: "mitsubishi",
-    model: "Lancer Evo VII",
+    brand: 'mitsubishi',
+    model: 'Lancer Evo VII',
     year: 2002,
     maxSpeed: 305,
     timeUpTo100: 2.7,
   },
   {
-    brand: "hyundai",
-    model: "accent",
+    brand: 'hyundai',
+    model: 'accent',
     year: 2007,
     maxSpeed: 294,
     timeUpTo100: 3.1,
@@ -89,9 +90,9 @@ const root = {
   getOneCar: async ({ id }) => {
     await delay(2000);
     if (!cars.find((car) => car.id === Number(id))) {
-      throw new GraphQLError("car not found", {
+      throw new GraphQLError('car not found', {
         extensions: {
-          code: "404",
+          code: '404',
         },
       });
     }
@@ -126,7 +127,7 @@ const root = {
     cars.splice(index, 1);
     return {
       id: -1,
-      brand: "",
+      brand: '',
       model: null,
       year: null,
       maxSpeed: null,
@@ -151,19 +152,17 @@ const getRandIncident = () => {
 setInterval(async () => {
   await delay(Math.trunc(Math.random() * 10000));
   aWss.clients.forEach((client) => {
-    client.send(
-      JSON.stringify({ method: "new_incident", data: getRandIncident() })
-    );
+    client.send(JSON.stringify({ method: 'new_incident', data: getRandIncident() }));
   });
 }, 1500);
 
 app.use(
-  "/graphql",
+  '/graphql',
   graphqlHTTP({
     graphiql: true,
     schema,
     rootValue: root,
-  })
+  }),
 );
 
-app.listen(PORT, () => console.log("server been running"));
+app.listen(PORT, () => console.log('server been running'));
