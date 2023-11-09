@@ -9,6 +9,7 @@ const aWss = WSServer.getWss();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+app.options("*", cors());
 app.use(express.json());
 
 app.ws("/", () => {});
